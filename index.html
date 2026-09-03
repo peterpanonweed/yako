@@ -6,6 +6,20 @@
 <title>YAKŌ 夜光 — A Night Descent Through The Wired City</title>
 <meta name="description" content="A five-chapter cinematic WebGL descent through a rain-soaked megacity. Procedural geometry, neon, holography and weather, driven entirely by scroll.">
 <meta name="theme-color" content="#04060c">
+<link rel="canonical" href="https://peterpanonweed.github.io/yako/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://peterpanonweed.github.io/yako/">
+<meta property="og:title" content="YAK&#332; &#22812;&#20809; — A Night Descent Through The Wired City">
+<meta property="og:description" content="Five chapters, one continuous camera path, no image assets. Every f&#231;ade, sign, puddle and hologram is drawn from seeded noise as the page loads.">
+<meta property="og:image" content="https://peterpanonweed.github.io/yako/assets/og.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Night Glow — a rain-lit neon canyon rendered in real time.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="YAK&#332; &#22812;&#20809; — A Night Descent Through The Wired City">
+<meta name="twitter:description" content="Five chapters, one continuous camera path, no image assets. Everything is drawn from seeded noise as the page loads.">
+<meta name="twitter:image" content="https://peterpanonweed.github.io/yako/assets/og.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2304060c'/%3E%3Cpath d='M6 24 L16 6 L26 24' stroke='%2335f0ff' stroke-width='2.4' fill='none'/%3E%3Cpath d='M11 24 L16 14 L21 24' stroke='%23ff2e88' stroke-width='2.4' fill='none'/%3E%3C/svg%3E">
 <style>
 /* ============================================================
@@ -699,8 +713,9 @@ h1,h2,h3{margin:0;font-weight:800}
         </div>
         <div>
           <ol>
-            <li class="el">No image files. Every texture in this page is drawn to a canvas by
-              seeded noise at load time, then uploaded once to the GPU.</li>
+            <li class="el">No image is ever loaded. Every texture in this page is drawn to a
+              canvas by seeded noise at load time, then uploaded once to the GPU &mdash; the one
+              picture in the repository is the social card, which the page itself never fetches.</li>
             <li class="el">No build step, no framework, no package manager. One HTML file and a
               local copy of three.js.</li>
             <li class="el">No network calls at runtime. No fonts, no analytics, no trackers.
@@ -1308,7 +1323,7 @@ function buildGround() {
 /* ------------------------------------------------------------- signs ----- */
 function buildSigns() {
   var rnd = mulberry32(5150);
-  var group = new THREE.Group(), refl = new THREE.Group();
+  var group = new THREE.Group(), refl = new THREE.Group(), glows = [];
   var glowTexCache = {};
   function glowFor(col) {
     if (!glowTexCache[col]) {
@@ -1351,9 +1366,9 @@ function buildSigns() {
     /* glow card behind the sign so bloom has something soft to grab */
     var gm = new THREE.MeshBasicMaterial({
       map: glowFor(s.color), transparent: true, blending: THREE.AdditiveBlending,
-      depthWrite: false, opacity: .55, fog: true
+      depthWrite: false, opacity: .32, fog: true
     });
-    var gl = new THREE.Mesh(planeGeo(w * 2.6, h * 2.4), gm);
+    var gl = new THREE.Mesh(planeGeo(w * 2.0, h * 1.9), gm);
     gl.position.set(x - side * .35, y, z);
     gl.rotation.copy(mesh.rotation);
     group.add(gl);
@@ -1368,7 +1383,9 @@ function buildSigns() {
     rp.position.set(x * .72, 0.06, z - 4);
     refl.add(rp);
 
-    if (rnd() < .22) flick.push({ m: mat, g: gm, ph: rnd() * 6.283, sp: rr(rnd, 4, 14) });
+    var fx = null;
+    if (rnd() < .22) { fx = { m: mat, on: 1, ph: rnd() * 6.283, sp: rr(rnd, 4, 14) }; flick.push(fx); }
+    glows.push({ o: gl, base: 0.30, fl: fx, n0: 14, n1: 90 });
   }
   /* shopfronts — low, close, and the only light the street actually gets */
   for (var f2 = 0; f2 < 54; f2++) {
@@ -1376,16 +1393,18 @@ function buildSigns() {
     var fz = rr(rnd, Z_FAR + 200, Z_NEAR - 20);
     var fc = pickA(rnd, NEONS);
     var fw = rr(rnd, 5, 11), fh = rr(rnd, 2.2, 4.4);
+    var bop = rr(rnd, .5, .85);
     var box = new THREE.Mesh(planeGeo(fw, fh), new THREE.MeshBasicMaterial({
-      color: new THREE.Color(fc), transparent: true, opacity: rr(rnd, .5, .85),
+      color: new THREE.Color(fc), transparent: true, opacity: bop,
       blending: THREE.AdditiveBlending, depthWrite: false
     }));
     box.position.set(sd * (STREET_HALF - .2), rr(rnd, 2.6, 6.4), fz);
     box.rotation.y = sd > 0 ? -Math.PI / 2 : Math.PI / 2;
     group.add(box);
+    glows.push({ o: box, base: bop, fl: null, n0: 6, n1: 30 });
     var spill = new THREE.Mesh(planeGeo(fw * 2.2, 14), new THREE.MeshBasicMaterial({
       map: glowFor(fc), transparent: true, blending: THREE.AdditiveBlending,
-      depthWrite: false, opacity: .3
+      depthWrite: false, opacity: .17
     }));
     spill.rotation.x = -Math.PI / 2;
     spill.position.set(sd * (STREET_HALF - 5), 0.07, fz);
@@ -1393,7 +1412,7 @@ function buildSigns() {
   }
 
   scene.add(group); scene.add(refl);
-  world.signs = group; world.signRefl = refl; world.flick = flick;
+  world.signs = group; world.signRefl = refl; world.flick = flick; world.glows = glows;
 
   /* three practical lights so the geometry near the street is not pure black */
   var l1 = new THREE.PointLight(0xff2e88, 2.2, 90, 2); l1.position.set(-9, 14, 30); scene.add(l1);
@@ -1566,7 +1585,7 @@ function buildHolo() {
   /* projector base glow */
   var pg = new THREE.Mesh(planeGeo(60, 60), new THREE.MeshBasicMaterial({
     map: new THREE.CanvasTexture(texGlow('rgba(53,240,255,.5)', 'rgba(53,240,255,.12)')),
-    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: .5
   }));
   pg.rotation.x = -Math.PI / 2; pg.position.set(-10, 22.5, -268);
   scene.add(pg);
@@ -1645,7 +1664,27 @@ function buildSmog() {
   g.add(under);
 
   scene.add(g);
-  world.smog = g; world.puffs = puffs;
+  world.smog = g; world.puffs = puffs; world.deck = deck; world.under = under;
+}
+
+/* glow cards fade out as the camera reaches them — the bloom pass carries the
+   near field, and a full-strength card at arm's length just clips to white */
+function fadeGlows() {
+  if (!world.glows) return;
+  for (var i = 0; i < world.glows.length; i++) {
+    var g = world.glows[i];
+    var d = g.o.position.distanceTo(camera.position);
+    g.o.material.opacity = g.base * smooth((d - g.n0) / (g.n1 - g.n0)) * (g.fl ? g.fl.on : 1);
+  }
+}
+
+/* the cloud deck only exists once the camera is near it */
+function fadeDeck() {
+  if (!world.deck) return;
+  var a = smooth((camera.position.y - 140) / 140);
+  world.deck.material.opacity = 0.22 * a;
+  world.under.material.opacity = 0.30 * a;
+  world.deck.visible = world.under.visible = a > 0.004;
 }
 
 /* -------------------------------------------------------------- rain ----- */
@@ -2444,9 +2483,11 @@ function animate() {
     for (var f = 0; f < world.flick.length; f++) {
       var fl = world.flick[f];
       var on = Math.sin(t * fl.sp + fl.ph) > -0.55 ? 1 : 0.12;
-      fl.m.opacity = on; fl.g.opacity = 0.55 * on;
+      fl.m.opacity = on; fl.on = on;
     }
   }
+  fadeDeck();
+  fadeGlows();
   if (world.orb) world.orb.lookAt(camera.position.x, world.orb.position.y, camera.position.z);
   if (world.wordmark) world.wordmark.material.opacity = clamp(1 - camU * 0.9, 0, 1) * 0.95;
 
@@ -2617,6 +2658,8 @@ function boot() {
         world.rainMat.uniforms.uCam.value.copy(camera.position);
         world.rainMat.uniforms.uAmt.value = clamp(1.25 - camera.position.y / 300, 0.05, 1);
       }
+      fadeDeck();
+      fadeGlows();
       onChapter(i);
       renderer.info.reset();
       renderPost(tAcc, 0);

@@ -7,10 +7,11 @@ Scroll drives one continuous camera path from an elevated establishing shot down
 to street level, up through the transit stack, past a broken hologram in the
 wired market, and out above the smog line where the orbital relay is coming up.
 
-**There are no image assets.** Every façade, sign, puddle, cloud, projection and
-foreground cutout in the page is drawn to a `<canvas>` from seeded noise when the
-page loads, then uploaded once to the GPU. The only file the page fetches is a
-local copy of three.js.
+**The page never loads an image.** Every façade, sign, puddle, cloud, projection
+and foreground cutout is drawn to a `<canvas>` from seeded noise when the page
+loads, then uploaded once to the GPU. The only file the page fetches is a local
+copy of three.js. (The JPEGs in `assets/` are the social card and the stills
+below — they live in the repository, not in the running page.)
 
 ## Running it
 
@@ -29,19 +30,39 @@ YAKO/
 ├── PROMPT.md           the build specification
 ├── README.md
 └── assets/
-    └── three.min.js    three.js r149 (MIT)
+    ├── three.min.js    three.js r149 (MIT)
+    ├── og.jpg          social card (never fetched by the page)
+    └── preview/        the chapter stills used in this README
 ```
 
-## Chapters
+## The five chapters
 
-| # | Section | Shot |
-|---|---------|------|
-| 00 | Night Glow | canyon mouth, looking up at the towers |
-| 01 | Ground Rain | street level, wet asphalt, shopfront neon |
-| 02 | The Stack | along the transit rail, hologram in the far distance |
-| 03 | Wired Market | the projection, full height, mid-tear |
-| 04 | Above The Line | tower tips through the cloud deck, the relay rising |
-| 05 | Manifesto | the relay at eye level, city as a glow |
+Every frame below is the page itself, captured live — no compositing, no retouching.
+
+### 00 · Night Glow
+![The canyon mouth, looking up at the towers](assets/preview/00-night-glow.jpg)
+
+### 01 · Ground Rain
+Street level, where the weather arrives second-hand and the neon stains the asphalt
+rather than lighting it.
+![Street level, wet asphalt and shopfront neon](assets/preview/01-ground-rain.jpg)
+
+### 02 · The Stack
+Along the transit deck, with the broken projection already glowing at the far end
+of the canyon.
+![Along the transit rail, hologram in the distance](assets/preview/02-the-stack.jpg)
+
+### 03 · Wired Market
+The projection at full height, mid-tear. Sixty-four scan bands, each jittered
+independently in the vertex shader.
+![The hologram at full height](assets/preview/03-wired-market.jpg)
+
+### 04 · Above The Line
+Six hundred metres up, where the rain stops being weather and becomes a floor.
+![Tower tips through the cloud deck, the relay rising](assets/preview/04-above-the-line.jpg)
+
+### 05 · Manifesto
+![The relay at eye level, the city as a glow](assets/preview/05-built-from-nothing.jpg)
 
 ## What is generated
 
