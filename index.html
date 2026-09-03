@@ -177,13 +177,29 @@ body.cursor-hot .cur-d{width:60px;height:60px;margin:-30px 0 0 -30px;border-colo
 .hero-in,.chap-txt,.mani > div,.pull{position:relative;isolation:isolate}
 .hero-in::before,.chap-txt::before,.mani > div::before,.pull::before{
   content:"";position:absolute;z-index:-1;pointer-events:none;
-  inset:-7% -11% -9% -9%;
-  background:radial-gradient(115% 90% at 32% 52%,
-    rgba(4,6,12,.90) 0%,rgba(4,6,12,.74) 42%,rgba(4,6,12,.28) 74%,rgba(4,6,12,0) 100%);
+  inset:-8% -14% -10% -10%;
+  /* a column veil, not a spot: a radial falls off before the last line of a
+     wide measure and leaves the copy sitting on bare neon */
+  background:linear-gradient(to right,
+    rgba(4,6,12,.93) 0%,rgba(4,6,12,.88) 46%,rgba(4,6,12,.66) 74%,
+    rgba(4,6,12,.22) 92%,rgba(4,6,12,0) 100%);
+  /* feather the top and bottom so the veil never reads as a box */
+  -webkit-mask-image:linear-gradient(to bottom,
+    rgba(0,0,0,0) 0%,#000 14%,#000 84%,rgba(0,0,0,0) 100%);
+  mask-image:linear-gradient(to bottom,
+    rgba(0,0,0,0) 0%,#000 14%,#000 84%,rgba(0,0,0,0) 100%);
 }
 .chap.rev .chap-txt::before{
-  background:radial-gradient(115% 90% at 68% 52%,
-    rgba(4,6,12,.90) 0%,rgba(4,6,12,.74) 42%,rgba(4,6,12,.28) 74%,rgba(4,6,12,0) 100%);
+  background:linear-gradient(to left,
+    rgba(4,6,12,.93) 0%,rgba(4,6,12,.88) 46%,rgba(4,6,12,.66) 74%,
+    rgba(4,6,12,.22) 92%,rgba(4,6,12,0) 100%);
+}
+@media (max-width:1080px){
+  /* stacked columns run the full width — keep the veil under the line ends */
+  .chap-txt::before,.chap.rev .chap-txt::before,.mani > div::before{
+    background:linear-gradient(to right,
+      rgba(4,6,12,.93) 0%,rgba(4,6,12,.90) 62%,rgba(4,6,12,.78) 88%,rgba(4,6,12,.5) 100%);
+  }
 }
 
 .sec{position:relative;min-height:118vh;padding:20vh 0 16vh;display:flex;align-items:center}
